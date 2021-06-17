@@ -1,6 +1,6 @@
 package com.github.tukcps.kmoc
 
 
-abstract class Process(val id: String) {
+abstract class Module(val id: String) {
     abstract suspend fun processing()
 }

@@ -1,19 +1,19 @@
 package com.github.tukcps.kmoc.examples
 
-import com.github.tukcps.kmoc.Process
+import com.github.tukcps.kmoc.Module
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 
 class FeedbackControl {
 
-    class UnitStep(id: String): Process(id) {
+    class UnitStep(id: String): Module(id) {
         lateinit var output: Channel<Double>
         override suspend fun processing() {
             output.send(1.0)
         }
     }
 
-    class Plant(id: String): Process(id) {
+    class Plant(id: String): Module(id) {
         lateinit var controlledInput: Channel<Double>
         lateinit var response: Channel<Double>
 
@@ -24,7 +24,7 @@ class FeedbackControl {
     }
 
 
-    class Controller(id: String): Process(id) {
+    class Controller(id: String): Module(id) {
         lateinit var setValue: Channel<Double>
         lateinit var isValue:  Channel<Double>
         lateinit var output: Channel<Double>
