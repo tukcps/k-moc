@@ -6,13 +6,16 @@ import kotlinx.coroutines.delay
 
 class SdfExample1 {
 
+    /** As source we use a source that produces just a sequence of increasing numbers, starting with 1.0 */
     class Source(id: String): Module(id) {
         lateinit var output: SdfChannel<Double>
+        var last = 0.0
         override suspend fun processing() {
-            output.write(1.0)
+            output.write(++last )
         }
     }
 
+    /** P1 just clones the values */
     class P1(id: String): Module(id) {
         lateinit var input: SdfChannel<Double>
         lateinit var output: SdfChannel<Double>
@@ -21,12 +24,13 @@ class SdfExample1 {
             val input = input.read()
 
             output.write(input)
-            output.write(input)
-            output.write(input)
-            output.write(input)
+            output.write(input+1.0)
+            output.write(input+2.0)
+            output.write(input+3.0)
         }
     }
 
+    /** P2 is a software process that adds two inputs */
     class P2(id: String): Module(id) {
         lateinit var input: SdfChannel<Double>
         lateinit var output: SdfChannel<Double>
@@ -46,7 +50,6 @@ class SdfExample1 {
 
         override suspend fun processing() {
             val inputSample = input.read()
-            println("     - Sink received: $inputSample")
         }
     }
 }
@@ -59,9 +62,9 @@ suspend fun main() {
     val sink = SdfExample1.Sink("Sink")
 
     // The channels
-    val sourceToP1 = SdfChannel<Double>(1)
-    val p1ToP2     = SdfChannel<Double>(4)
-    val p2ToSink   = SdfChannel<Double>(2)
+    val sourceToP1 = SdfChannel<Double>("source output", 1, true)
+    val p1ToP2     = SdfChannel<Double>("p1 output", 4, true)
+    val p2ToSink   = SdfChannel<Double>("p2 output", 2, true)
 
     // Connections
     source.output = sourceToP1
@@ -77,7 +80,7 @@ suspend fun main() {
     while(true) {
         println("\nExecuting schedule of cluster ... ")
         schedule.forEach {
-            delay(1000)
+            delay(100)
             println("   - ${it.id}")
             it.processing()
         }

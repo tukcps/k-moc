@@ -5,15 +5,42 @@ package com.github.tukcps.kmoc
 
 import kotlinx.coroutines.channels.Channel
 
-
+/**
+ * The very basic KPN channel is just a FIFO that has blocking read when empty,
+ * and infinite sizes. We implement it with Kotlin's Channel class that is
+ * precisely a KPN channel :-).
+ */
 class KpnChannel<T> {
     val fifo = Channel<T>(Channel.UNLIMITED)
     suspend fun write(sample: T) { fifo.send(sample) }
     suspend fun read() = fifo.receive()
 }
 
-class SdfChannel<T>(size: Int) {
+
+/**
+ * The very basic SDF channel is just a FIFO that has a determined size,
+ * We implement it with Kotlin's Channel class that we restrict to a size.
+ * Note, that the blocking feature is not needed here, as we have a pre-defined
+ * schedule; hence, neither blocking nor overflow must occur for a correct schedule.
+ */
+class SdfChannel<T>(val id: String, val size: Int, var verbose: Boolean = false) {
     val fifo = Channel<T>(size)
-    suspend fun write(sample: T) { fifo.send(sample) }
+    suspend fun write(sample: T) {
+        if (verbose)
+            println("         written to $id: $sample")
+        fifo.send(sample)
+    }
+    suspend fun read() = fifo.receive()
+}
+
+
+class TdfChannel<T>(val id: String, val size: Int, var verbose: Boolean = false) {
+    val fifo = Channel<T>(size)
+
+    suspend fun write(sample: T) {
+        if (verbose)
+            println("         written to $id: $sample at time: $simulatedTime $timeUnit (+ no. module activation + no. sample)")
+        fifo.send(sample)
+    }
     suspend fun read() = fifo.receive()
 }

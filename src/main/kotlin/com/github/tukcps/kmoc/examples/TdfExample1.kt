@@ -1,36 +1,37 @@
 package com.github.tukcps.kmoc.examples
 
 import com.github.tukcps.kmoc.Module
-import com.github.tukcps.kmoc.SdfChannel
+import com.github.tukcps.kmoc.TdfChannel
 import com.github.tukcps.kmoc.simulatedTime
 import kotlinx.coroutines.delay
 
 class TdfExample1 {
 
     class Source(id: String): Module(id) {
-        lateinit var output: SdfChannel<Double>
+        lateinit var output: TdfChannel<Double>
+        var last = 0.0
         override suspend fun processing() {
-            output.write(1.0)
+            output.write(++last )
         }
     }
 
     class P1(id: String): Module(id) {
-        lateinit var input: SdfChannel<Double>
-        lateinit var output: SdfChannel<Double>
+        lateinit var input: TdfChannel<Double>
+        lateinit var output: TdfChannel<Double>
 
         override suspend fun processing() {
             val input = input.read()
 
             output.write(input)
-            output.write(input)
-            output.write(input)
-            output.write(input)
+            output.write(input+1.0)
+            output.write(input+2.0)
+            output.write(input+3.0)
         }
     }
 
     class P2(id: String): Module(id) {
-        lateinit var input: SdfChannel<Double>
-        lateinit var output: SdfChannel<Double>
+        lateinit var input: TdfChannel<Double>
+        lateinit var output: TdfChannel<Double>
 
         override suspend fun processing() {
             val inputSample1 = input.read()
@@ -43,11 +44,10 @@ class TdfExample1 {
     }
 
     class Sink(id: String): Module(id) {
-        lateinit var input: SdfChannel<Double>
+        lateinit var input: TdfChannel<Double>
 
         override suspend fun processing() {
             val inputSample = input.read()
-            println("     - Sink received: $inputSample")
         }
     }
 }
@@ -60,9 +60,9 @@ suspend fun main() {
     val sink = TdfExample1.Sink("Sink")
 
     // The channels
-    val sourceToP1 = SdfChannel<Double>(1)
-    val p1ToP2     = SdfChannel<Double>(4)
-    val p2ToSink   = SdfChannel<Double>(2)
+    val sourceToP1 = TdfChannel<Double>("source output", 1, true)
+    val p1ToP2     = TdfChannel<Double>("p1 output", 4, true)
+    val p2ToSink   = TdfChannel<Double>("p2 output", 2, true)
 
     // Connections
     source.output = sourceToP1
@@ -77,12 +77,12 @@ suspend fun main() {
     val clusterTimeStep = 4
 
     while(true) {
-        simulatedTime += clusterTimeStep
         println("\nExecuting schedule of cluster at time $simulatedTime ")
         schedule.forEach {
             delay(1000)
             println("   - ${it.id}")
             it.processing()
         }
+        simulatedTime += clusterTimeStep
     }
 }

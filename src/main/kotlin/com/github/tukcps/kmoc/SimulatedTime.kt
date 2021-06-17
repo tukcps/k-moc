@@ -7,4 +7,4 @@ package com.github.tukcps.kmoc
  */
 
 var simulatedTime: Long = 0
-var timeUnit: String = ""
+var timeUnit: String = "ms"
