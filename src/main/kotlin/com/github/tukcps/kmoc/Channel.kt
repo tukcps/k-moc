@@ -4,3 +4,16 @@
 package com.github.tukcps.kmoc
 
 import kotlinx.coroutines.channels.Channel
+
+
+class KpnChannel<T> {
+    val fifo = Channel<T>(Channel.UNLIMITED)
+    suspend fun write(sample: T) { fifo.send(sample) }
+    suspend fun read() = fifo.receive()
+}
+
+class SdfChannel<T>(size: Int) {
+    val fifo = Channel<T>(size)
+    suspend fun write(sample: T) { fifo.send(sample) }
+    suspend fun read() = fifo.receive()
+}
