@@ -3,8 +3,4 @@
  */
 package com.github.tukcps.kmoc
 
-class Library {
-    fun someLibraryMethod(): Boolean {
-        return true
-    }
-}
+import kotlinx.coroutines.channels.Channel
