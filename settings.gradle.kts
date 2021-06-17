@@ -8,4 +8,3 @@
  */
 
 rootProject.name = "k-moc"
-include("lib")
